@@ -1,7 +1,7 @@
 import pygame
 from pygame import Surface, sprite, display
 
-from CONFIG import TILE_SIZE, MAZE_BACKGROUND_COLOR, DISPLAY_OFFSET
+from config import TILE_SIZE, MAZE_BACKGROUND_COLOR, DisplayOffset, SIMULATION_SPEED
 from components import Wall, Exit, Runner, Path, GhostPath
 from ui.fpsCounter import FPSCounter
 from algorithms import Grid
@@ -25,25 +25,25 @@ class MazeRenderer:
         self.trail_index = -1
 
     def _add_path_tile(self, x_grid: int, y_grid: int) -> None:
-        x = x_grid * TILE_SIZE + DISPLAY_OFFSET.x
-        y = y_grid * TILE_SIZE + DISPLAY_OFFSET.y
+        x = x_grid * TILE_SIZE + DisplayOffset._x
+        y = y_grid * TILE_SIZE + DisplayOffset._y
         path = Path(x, y)
         self.background.blit(path.image, path.rect)
         self.region_update_queue.append(path.rect)
         
-    def _add_ghost_path(self, x_grid: int, y_grid: int) -> None:
-        x = x_grid * TILE_SIZE + DISPLAY_OFFSET.x
-        y = y_grid * TILE_SIZE + DISPLAY_OFFSET.y
+    def _add_ghost_tile(self, x_grid: int, y_grid: int) -> None:
+        x = x_grid * TILE_SIZE + DisplayOffset._x
+        y = y_grid * TILE_SIZE + DisplayOffset._y
         path = GhostPath(x, y)
         self.background.blit(path.image, path.rect)
         self.region_update_queue.append(path.rect)
             
-    def _walk_path(self, maze: Maze, speed: int = 50) -> None:
-        for _ in range(speed):
+    def _walk_path(self, maze: Maze) -> None:
+        for _ in range(SIMULATION_SPEED):
             y, x = maze.solve_history[self.trail_index]
             if maze.grid[y][x] != 'S' and maze.grid[y][x] != 'E':
                 if (y, x) in maze.path: self._add_path_tile(x, y)
-                else:                   self._add_ghost_path(x, y)
+                else:                   self._add_ghost_tile(x, y)
                     
             self.trail_index += 1
             if self.trail_index >= len(maze.solve_history): break
@@ -60,8 +60,8 @@ class MazeRenderer:
     def draw_static_maze(self, maze: Maze) -> None:
         for row_i, row in enumerate(maze.grid):
             for col_i, char in enumerate(row):
-                x = col_i * TILE_SIZE + DISPLAY_OFFSET.x
-                y = row_i * TILE_SIZE + DISPLAY_OFFSET.y
+                x = col_i * TILE_SIZE + DisplayOffset._x
+                y = row_i * TILE_SIZE + DisplayOffset._y
                 
                 if char == '#':
                     wall = Wall(x, y)
