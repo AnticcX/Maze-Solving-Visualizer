@@ -1,7 +1,7 @@
 import random
 from typing import Optional, Literal, TypeAlias
 
-from algorithms import solve_dfs, randomized_dfs
+from algorithms import solve_dfs, solve_bfs, randomized_dfs
 from core.Types import Coordinate, MazeAlgorithm
 
 
@@ -19,7 +19,6 @@ class Maze:
         self.runtime: int = None
         self.solve_history: list[tuple[int, int]] = None
     
-    # Utilizes a DFS algorithm to generate a random maze
     def generate_random(
         self, 
         width: int, 
@@ -37,4 +36,4 @@ class Maze:
         ) -> None:
         
         self.selected_algorithm = algorithm
-        self.path, self.visited_count, self.runtime = solve_dfs(self.grid) if algorithm == 'DFS' else ... # ADD BFS option here when code is received 
+        self.path, self.visited_count, self.runtime = solve_dfs(self.grid) if algorithm == 'DFS' else solve_bfs(self.grid) # ADD BFS option here when code is received 

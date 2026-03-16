@@ -15,7 +15,7 @@ def main():
     
     maze = Maze(screen, clock)
     maze.generate_random(100, 100, (1, 1), (47, 47))
-    maze.solve()
+    maze.solve('bfs')
     
     renderer = MazeRenderer(screen, clock)
     
