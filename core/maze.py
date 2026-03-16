@@ -1,5 +1,4 @@
-import random
-from typing import Optional, Literal, TypeAlias
+from typing import Optional, Literal
 
 from algorithms import solve_dfs, solve_bfs, randomized_dfs
 from core.Types import Coordinate, MazeAlgorithm
@@ -25,10 +24,11 @@ class Maze:
         height: int, 
         start_pos: Coordinate = None, 
         end_pos: Coordinate = None, 
+        complexity: Optional[float] = 0.05,
         algorithm: MazeAlgorithm = 'dfs'
         ) -> None:
         
-        if algorithm == 'dfs': self.grid = randomized_dfs.generate(width, height, start_pos, end_pos)
+        if algorithm == 'dfs': self.grid = randomized_dfs.generate(width, height, start_pos, end_pos, complexity)
         
     def solve(
         self, 
@@ -36,4 +36,4 @@ class Maze:
         ) -> None:
         
         self.selected_algorithm = algorithm
-        self.path, self.visited_count, self.runtime = solve_dfs(self.grid) if algorithm == 'DFS' else solve_bfs(self.grid) # ADD BFS option here when code is received 
+        self.path, self.visited_count, self.runtime = solve_dfs(self.grid) if algorithm.lower() == 'dfs' else solve_bfs(self.grid)
