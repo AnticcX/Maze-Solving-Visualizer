@@ -5,7 +5,7 @@ from pygame import Surface, font, time
 from pygame.font import Font
 from pygame.time import Clock
 
-
+# Make this a better visual
 class FPSCounter(Sprite):
     def __init__(self, x: float, y: float,  clock: Clock, font: Font = None):
         super().__init__()
