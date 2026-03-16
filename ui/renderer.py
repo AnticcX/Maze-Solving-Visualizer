@@ -2,7 +2,7 @@ import pygame
 from pygame import Surface, sprite, display
 
 from CONFIG import TILE_SIZE, MAZE_BACKGROUND_COLOR, DISPLAY_OFFSET
-from components import Wall, Exit, Runner, Path
+from components import Wall, Exit, Runner, Path, GhostPath
 from ui.fpsCounter import FPSCounter
 from algorithms import Grid
 from core.maze import Maze
@@ -15,6 +15,7 @@ class MazeRenderer:
         self.all_sprites = sprite.RenderUpdates()
         self.background = Surface(screen.get_size())
         self.background.fill(MAZE_BACKGROUND_COLOR)
+        self.clean_background = self.background.copy()
         
         self.all_sprites.add(FPSCounter(0, 0, self.clock))
         
@@ -29,12 +30,47 @@ class MazeRenderer:
         path = Path(x, y)
         self.background.blit(path.image, path.rect)
         self.region_update_queue.append(path.rect)
+    
+    def _remove_path_tile(self, x_grid: int, y_grid: int) -> None:
+        x = x_grid * TILE_SIZE + DISPLAY_OFFSET.x
+        y = y_grid * TILE_SIZE + DISPLAY_OFFSET.y
+        path = GhostPath(x, y)
+        self.background.blit(self.clean_background, path.rect, path.rect)
+        self.region_update_queue.append(path.rect)
         
+    def _generate_ghost_tile(self, x_grid: int, y_grid: int) -> None:
+        x = x_grid * TILE_SIZE + DISPLAY_OFFSET.x
+        y = y_grid * TILE_SIZE + DISPLAY_OFFSET.y
+        path = GhostPath(x, y)
+        self.background.blit(path.image, path.rect)
+        self.region_update_queue.append(path.rect)
+            
     def _walk_path(self, maze: Maze) -> None:
         y, x = maze.path[self.trail_index]
         if maze.grid[y][x] != 'S' and maze.grid[y][x] != 'E':
             self._add_path_tile(x, y)
         self.trail_index += 1
+        
+    def reset_screen(self) -> None:
+        self.all_sprites.clear(self.screen, self.background)
+        self.all_sprites.empty()
+        self.all_sprites.add(FPSCounter(0, 0, self.clock))
+        self.background = self.clean_background.copy()
+        self.cached_grid: Grid = None
+        self.region_update_queue = [self.screen.get_rect()]
+        self.trail_index = -1
+    
+    def clear_ghost_trail(self, maze: Maze) -> None:
+        for tile in maze.path:
+            y, x = tile
+            self._remove_path_tile(x, y)
+        self.trail_index = -1
+        
+    def clear_trail(self, maze: Maze) -> None:
+        for tile in maze.path:
+            y, x = tile
+            self._generate_ghost_tile(x, y)
+        self.trail_index = -1
 
     def draw_static_maze(self, maze: Maze) -> None:
         for row_i, row in enumerate(maze.grid):

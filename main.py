@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, copy
 
 from core.maze import Maze
 from ui.renderer import MazeRenderer
@@ -14,8 +14,8 @@ def main():
     clock = pygame.time.Clock()
     
     maze = Maze(screen, clock)
-    maze.generate_random(100, 100, (1, 1), (47, 47))
-    maze.solve('bfs')
+    maze.generate_random(50, 50, (1, 1), (47, 47), 0.3)
+    maze.solve()
     
     renderer = MazeRenderer(screen, clock)
     
@@ -27,6 +27,18 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                if event.key == pygame.K_0:
+                    ghost_trail = copy.copy(maze)
+                    if maze.selected_algorithm == 'bfs':    maze.solve('dfs')
+                    else:                                   maze.solve('bfs')
+                    renderer.clear_ghost_trail(maze)
+                    renderer.clear_trail(ghost_trail)
+                    
+                if event.key == pygame.K_1:
+                    renderer.reset_screen()
+                    maze = Maze(screen, clock)
+                    maze.generate_random(50, 50, (1, 1), (47, 47), 0.3)
+                    maze.solve()
         
         if maze.grid != renderer.cached_grid:
             renderer.draw_static_maze(maze)
