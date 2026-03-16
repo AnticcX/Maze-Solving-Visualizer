@@ -1,10 +1,17 @@
 from typing import Optional
-from random import choice
+from random import choice, random
 
 from core.Types import Coordinate, Grid
 
 
-def generate(width: int, height: int, start_pos: Optional[Coordinate] = None, end_pos: Optional[Coordinate] = None) -> Grid:
+def generate(
+    width: int, 
+    height: int, 
+    start_pos: Optional[Coordinate] = None, 
+    end_pos: Optional[Coordinate] = None, 
+    complexity: float = 0.05
+    ) -> Grid:
+    
     grid = [['#' for _ in range(width)] for _ in range(height)]
     visited = set()
     stack = []
@@ -14,6 +21,7 @@ def generate(width: int, height: int, start_pos: Optional[Coordinate] = None, en
     visited.add((start_y, start_x))
     stack.append((start_y, start_x))
     
+    # generate a perfect, one solution maze
     while stack:
         current_y, current_x = stack[-1]
             
@@ -43,6 +51,18 @@ def generate(width: int, height: int, start_pos: Optional[Coordinate] = None, en
         else:
             # Backtrack
             stack.pop()
+    
+    # create multiple paths
+    for y in range(1, height - 1):
+        for x in range(1, width - 1):
+            if grid[y][x] == '#':
+                is_horizontal_wall = grid[y][x-1] == '.' and grid[y][x+1] == '.'
+                is_vertical_wall = grid[y-1][x] == '.' and grid[y+1][x] == '.'
+                
+                if is_horizontal_wall or is_vertical_wall:
+                    if random() < complexity:
+                        grid[y][x] = '.'
+            
     if start_pos:   grid = place_start(grid, start_pos)
     else:           grid = place_start(grid)
         
