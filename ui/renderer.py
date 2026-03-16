@@ -2,7 +2,7 @@ import pygame
 from pygame import Surface, sprite, display
 from typing import Optional, Union
 
-from config import TILE_SIZE, MAZE_BACKGROUND_COLOR, DisplayOffset, SIMULATION_SPEED
+from config import TILE_SIZE, MAZE_BACKGROUND_COLOR, SIMULATION_SPEED, DisplayOffset, Panel
 from components import Wall, Exit, Runner, Path, GhostPath
 from ui.fpsCounter import FPSCounter
 from algorithms import Grid
@@ -24,7 +24,18 @@ class MazeRenderer:
         self.region_update_queue = []
         
         self.trail_index = -1
+    
+    def _center_maze(self, maze: Maze) -> None:
+        screen_width, screen_height = self.screen.get_size()
         
+        maze_pixel_width = len(maze.grid[0]) * TILE_SIZE
+        maze_pixel_height = len(maze.grid) * TILE_SIZE
+        
+        available_width = screen_width - Panel.width
+        available_height = screen_height - Panel.top_margin - Panel.bottom_margin
+        
+        DisplayOffset.x = Panel.width + max((available_width - maze_pixel_width) // 2, 0)
+        DisplayOffset.y = Panel.top_margin + max((available_height - maze_pixel_height) // 2, 0)
 
     def _add_tile(self, x_grid: int, y_grid: int, tile: Union[Path, GhostPath]) -> None:
         x = x_grid * TILE_SIZE + DisplayOffset.x
@@ -53,6 +64,7 @@ class MazeRenderer:
         self.trail_index = -1
 
     def draw_static_maze(self, maze: Maze) -> None:
+        self._center_maze(maze)
         for row_i, row in enumerate(maze.grid):
             for col_i, char in enumerate(row):
                 x = col_i * TILE_SIZE + DisplayOffset.x

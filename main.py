@@ -2,7 +2,7 @@ import pygame, sys
 
 from core.maze import Maze
 from ui.renderer import MazeRenderer
-from config import ScreenSize, MaxMazeSize
+from config import ScreenSize, MazeSize
 
 def main():
     pygame.display.init()
@@ -14,7 +14,7 @@ def main():
     clock = pygame.time.Clock()
     
     maze = Maze(screen, clock)
-    maze.generate_random(MaxMazeSize.width, MaxMazeSize.height, (1, 1), (MaxMazeSize.width-3, MaxMazeSize.height-3), 0.025)
+    maze.generate_random(MazeSize.width, MazeSize.height, (1, 1), (MazeSize.width-3, MazeSize.height-3), 0.025)
     maze.solve('bfs')
     
     renderer = MazeRenderer(screen, clock)
@@ -36,7 +36,7 @@ def main():
                 if event.key == pygame.K_1:
                     renderer.reset_screen()
                     maze = Maze(screen, clock)
-                    maze.generate_random(MaxMazeSize.width, MaxMazeSize.height, (1, 1), (MaxMazeSize.width-3, MaxMazeSize.height-3), 0.025)
+                    maze.generate_random(MazeSize.width, MazeSize.height, (1, 1), (MazeSize.width-3, MazeSize.height-3), 0.025)
                     maze.solve()
         
         if maze.grid != renderer.cached_grid:

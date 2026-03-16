@@ -8,6 +8,13 @@ class ScreenSize:
     width = 1650
     height = 1030
     
+@dataclass
+class Panel:
+    width = 500
+    height = 500
+    top_margin = 20
+    bottom_margin = 80
+    
 # Maze config
 @dataclass
 class DisplayOffset:
@@ -15,14 +22,16 @@ class DisplayOffset:
     y = 0
     
 @dataclass
-class MaxMazeSize:
-    width = 100
-    height = 100
+class MazeSize:
+    width = 50
+    height = 50
+    max_width = 1000
+    max_height = 1000
 
 MAZE_BACKGROUND_COLOR: tuple = (100, 105, 100) # rgb value
 
 # Sprite config
-TILE_SIZE: int = 1000 / ((MaxMazeSize.width + MaxMazeSize.height) / 2) # Pixel size of each grid square
+TILE_SIZE: int = 1000 / ((MazeSize.width + MazeSize.height) / 2) # Pixel size of each grid square
 GHOST_PATH_COLOR: tuple = (40, 40, 55)
 PATH_COLOR: tuple = (255, 255, 0)
 RUNNER_COLOR: tuple = (255, 100, 255)
