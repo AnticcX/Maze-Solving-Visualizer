@@ -19,6 +19,7 @@ def bfs(maze):
     if not start or not end:
         return None, 0, 0
 
+    path_history = []
     queue = deque([start])
     visited = set([start])
     parent = {}
@@ -27,6 +28,7 @@ def bfs(maze):
 
     while queue:
         current = queue.popleft()
+        path_history.append(current)
 
         if current == end:
             break
@@ -54,4 +56,4 @@ def bfs(maze):
     path.append(start)
     path.reverse()
 
-    return path, len(visited), runtime
+    return path, len(visited), runtime, path_history

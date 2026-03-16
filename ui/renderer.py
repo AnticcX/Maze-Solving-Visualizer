@@ -30,26 +30,23 @@ class MazeRenderer:
         path = Path(x, y)
         self.background.blit(path.image, path.rect)
         self.region_update_queue.append(path.rect)
-    
-    def _remove_path_tile(self, x_grid: int, y_grid: int) -> None:
-        x = x_grid * TILE_SIZE + DISPLAY_OFFSET.x
-        y = y_grid * TILE_SIZE + DISPLAY_OFFSET.y
-        path = GhostPath(x, y)
-        self.background.blit(self.clean_background, path.rect, path.rect)
-        self.region_update_queue.append(path.rect)
         
-    def _generate_ghost_tile(self, x_grid: int, y_grid: int) -> None:
+    def _add_ghost_path(self, x_grid: int, y_grid: int) -> None:
         x = x_grid * TILE_SIZE + DISPLAY_OFFSET.x
         y = y_grid * TILE_SIZE + DISPLAY_OFFSET.y
         path = GhostPath(x, y)
         self.background.blit(path.image, path.rect)
         self.region_update_queue.append(path.rect)
             
-    def _walk_path(self, maze: Maze) -> None:
-        y, x = maze.path[self.trail_index]
-        if maze.grid[y][x] != 'S' and maze.grid[y][x] != 'E':
-            self._add_path_tile(x, y)
-        self.trail_index += 1
+    def _walk_path(self, maze: Maze, speed: int = 50) -> None:
+        for _ in range(speed):
+            y, x = maze.solve_history[self.trail_index]
+            if maze.grid[y][x] != 'S' and maze.grid[y][x] != 'E':
+                if (y, x) in maze.path: self._add_path_tile(x, y)
+                else:                   self._add_ghost_path(x, y)
+                    
+            self.trail_index += 1
+            if self.trail_index >= len(maze.solve_history): break
         
     def reset_screen(self) -> None:
         self.all_sprites.clear(self.screen, self.background)
@@ -58,18 +55,6 @@ class MazeRenderer:
         self.background = self.clean_background.copy()
         self.cached_grid: Grid = None
         self.region_update_queue = [self.screen.get_rect()]
-        self.trail_index = -1
-    
-    def clear_ghost_trail(self, maze: Maze) -> None:
-        for tile in maze.path:
-            y, x = tile
-            self._remove_path_tile(x, y)
-        self.trail_index = -1
-        
-    def clear_trail(self, maze: Maze) -> None:
-        for tile in maze.path:
-            y, x = tile
-            self._generate_ghost_tile(x, y)
         self.trail_index = -1
 
     def draw_static_maze(self, maze: Maze) -> None:
@@ -89,7 +74,7 @@ class MazeRenderer:
         self.cached_grid = maze.grid
         
     def render(self, maze: Maze) -> None:
-        if self.trail_index < len(maze.path):
+        if self.trail_index < len(maze.solve_history):
             self._walk_path(maze)
             
         self.all_sprites.update()

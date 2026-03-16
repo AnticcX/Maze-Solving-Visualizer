@@ -38,6 +38,7 @@ def solve_dfs(maze: MazeGrid) -> Dict[str, object]:
         - visited_count: int
         - runtime: float (seconds)
         - message: str
+        - path_history: list of (row, col) coordinates of all paths traveled
     """
     start_time = perf_counter()
     if not maze or not maze[0]:
@@ -47,7 +48,8 @@ def solve_dfs(maze: MazeGrid) -> Dict[str, object]:
             "path_length": 0,
             "visited_count": 0,
             "runtime": 0.0,
-            "message": "Invalid maze: empty grid."
+            "message": "Invalid maze: empty grid.",
+            "path_history": []
         }
 
     rows = len(maze)
@@ -60,7 +62,8 @@ def solve_dfs(maze: MazeGrid) -> Dict[str, object]:
             "path_length": 0,
             "visited_count": 0,
             "runtime": 0.0,
-            "message": "Invalid maze: rows have inconsistent lengths."
+            "message": "Invalid maze: rows have inconsistent lengths.",
+            "path_history": []
         }
 
     start = _find_cell(maze, 'S')
@@ -73,7 +76,8 @@ def solve_dfs(maze: MazeGrid) -> Dict[str, object]:
             "path_length": 0,
             "visited_count": 0,
             "runtime": 0.0,
-            "message": "Invalid maze: missing start 'S'."
+            "message": "Invalid maze: missing start 'S'.",
+            "path_history": []
         }
 
     if end is None:
@@ -83,16 +87,19 @@ def solve_dfs(maze: MazeGrid) -> Dict[str, object]:
             "path_length": 0,
             "visited_count": 0,
             "runtime": 0.0,
-            "message": "Invalid maze: missing end 'E'."
+            "message": "Invalid maze: missing end 'E'.",
+            "path_history": []
         }
 
     stack: List[Coordinate] = [start]
+    path_history: List[Coordinate] = []
     visited = {start}
     parent: Dict[Coordinate, Optional[Coordinate]] = {start: None}
     visited_count = 0
 
     while stack:
         current = stack.pop()
+        path_history.append(current)
         visited_count += 1
 
         if current == end:
@@ -104,7 +111,8 @@ def solve_dfs(maze: MazeGrid) -> Dict[str, object]:
                 "path_length": len(path) - 1,
                 "visited_count": visited_count,
                 "runtime": runtime,
-                "message": "Path found."
+                "message": "Path found.",
+                "path_history": path_history
             }
 
         for neighbor in _get_neighbors(current, rows, cols):
@@ -121,7 +129,8 @@ def solve_dfs(maze: MazeGrid) -> Dict[str, object]:
         "path_length": 0,
         "visited_count": visited_count,
         "runtime": runtime,
-        "message": "No Path Found"
+        "message": "No Path Found",
+        "path_history": []
     }
 
 

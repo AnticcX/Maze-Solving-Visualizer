@@ -8,6 +8,6 @@ class DISPLAY_OFFSET:
 MAZE_BACKGROUND_COLOR: Tuple = (0, 0, 0) # rgb value
 
 # Sprite config
-TILE_SIZE: int = 16 # Pixel size of each grid square
+TILE_SIZE: int = 4 # Pixel size of each grid square
 
 # Runner config

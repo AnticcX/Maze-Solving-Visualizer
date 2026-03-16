@@ -36,4 +36,4 @@ class Maze:
         ) -> None:
         
         self.selected_algorithm = algorithm
-        self.path, self.visited_count, self.runtime = solve_dfs(self.grid) if algorithm.lower() == 'dfs' else solve_bfs(self.grid)
+        self.path, self.visited_count, self.runtime, self.solve_history = solve_dfs(self.grid) if algorithm.lower() == 'dfs' else solve_bfs(self.grid)
