@@ -1,1 +1,1 @@
-![Gif of maze being solved](Maze-Solving-Visualizer/solver.gif)
+![Gif of maze being solved](solver.gif)
