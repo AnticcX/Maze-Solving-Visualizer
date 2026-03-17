@@ -86,12 +86,4 @@ GHOST_PATH_COLOR        : RGB = (40, 40, 55)
 PATH_COLOR              : RGB = (255, 255, 0)
 RUNNER_COLOR            : RGB = (255, 100, 255)
 WALL_COLOR              : RGB = (20, 20, 20)
-<<<<<<< HEAD:CONFIG.py
 EXIT_COLOR              : RGB = (0, 255, 0)
-=======
-EXIT_COLOR              : RGB = (0, 255, 0)
-
-
-# Simulation config
-SIMULATION_SPEED        : int = 1 # How many tile paths are being drawn per each game tick
->>>>>>> 63383b4d486babbe12d8983fab04e9bd806aa653:config.py
