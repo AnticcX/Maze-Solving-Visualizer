@@ -25,10 +25,10 @@ class Maze:
         start_pos: Coordinate = None, 
         end_pos: Coordinate = None, 
         complexity: Optional[float] = 0.05,
-        algorithm: MazeAlgorithm = 'dfs'
+        algorithm: MazeAlgorithm = 'DFS'
         ) -> None:
         
-        if algorithm == 'dfs': self.grid = randomized_dfs.generate(width, height, start_pos, end_pos, complexity)
+        if algorithm == 'DFS': self.grid = randomized_dfs.generate(width, height, start_pos, end_pos, complexity)
         
     def solve(
         self, 

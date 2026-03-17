@@ -2,6 +2,7 @@ from typing import Optional
 from random import choice, random
 
 from core.Types import Coordinate, Grid
+from config import Tile
 
 
 def generate(
@@ -17,7 +18,7 @@ def generate(
     stack = []
         
     start_y, start_x = 1, 1
-    grid[start_y][start_x] = '.'
+    grid[start_y][start_x] = Tile.air
     visited.add((start_y, start_x))
     stack.append((start_y, start_x))
     
@@ -43,8 +44,8 @@ def generate(
             wall_y = (current_y + next_y) // 2
             wall_x = (current_x + next_x) // 2
             
-            grid[wall_y][wall_x] = '.' # Remove wall
-            grid[next_y][next_x] = '.' # Set destination as path
+            grid[wall_y][wall_x] = Tile.air # Remove wall
+            grid[next_y][next_x] = Tile.air # Set destination as path
             
             visited.add((next_y, next_x))
             stack.append((next_y, next_x))
@@ -55,13 +56,13 @@ def generate(
     # create multiple paths
     for y in range(1, height - 1):
         for x in range(1, width - 1):
-            if grid[y][x] == '#':
-                is_horizontal_wall = grid[y][x-1] == '.' and grid[y][x+1] == '.'
-                is_vertical_wall = grid[y-1][x] == '.' and grid[y+1][x] == '.'
+            if grid[y][x] == Tile.wall:
+                is_horizontal_wall = grid[y][x-1] == Tile.air and grid[y][x+1] == Tile.air
+                is_vertical_wall = grid[y-1][x] == Tile.air and grid[y+1][x] == Tile.air
                 
                 if is_horizontal_wall or is_vertical_wall:
                     if random() < complexity:
-                        grid[y][x] = '.'
+                        grid[y][x] = Tile.air
             
     if start_pos:   grid = place_start(grid, start_pos)
     else:           grid = place_start(grid)
@@ -75,10 +76,10 @@ def generate(
 
 def place_start(grid: Grid, pos: Optional[Coordinate] = (1, 1)) -> Grid:
     x, y = pos
-    grid[y][x] = 'S'
+    grid[y][x] = Tile.runner.upper()
     return grid
     
 def place_exit(grid: Grid, pos: Coordinate) -> Grid:
     x, y = pos
-    grid[y][x] = 'E'
+    grid[y][x] = Tile.exit.upper()
     return grid
