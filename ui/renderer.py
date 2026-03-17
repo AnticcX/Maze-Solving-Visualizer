@@ -1,12 +1,21 @@
 import pygame
-from pygame import Surface, sprite, display
+from pygame import Surface, sprite, display, Rect
 from typing import Optional, Union
 
-from config import TILE_SIZE, MAZE_BACKGROUND_COLOR, SIMULATION_SPEED, DisplayOffset, Panel
 from components import Wall, Exit, Runner, Path, GhostPath
-from ui.fpsCounter import FPSCounter
+from ui.fps_counter import FPSCounter
+from ui.input_box import InputBox
 from algorithms import Grid
 from core.maze import Maze
+from core.Types import RGB
+from ui.buttons import Buttons
+from config import (
+    TILE_SIZE, MAZE_BACKGROUND_COLOR, SIMULATION_SPEED, TITLE_FONT, BUTTON_FONT, LABEL_FONT, STATS_FONT,
+    BUTTON_TEXT_COLOR, DEFAULT_BUTTON_COLOR, NO_PATH_TEXT_COLOR, DFS_TEXT_COLOR, BFS_TEXT_COLOR,
+    SELECTED_BFS_COLOR, SELECTED_DFS_COLOR, UNSELECTED_BFS_COLOR, UNSELECTED_DFS_COLOR,
+    STATS_START_Y_POS, STATS_LABEL_GAP,
+    DisplayOffset, Panel
+)
 
 
 class MazeRenderer:
@@ -24,6 +33,74 @@ class MazeRenderer:
         self.region_update_queue = []
         
         self.trail_index = -1
+        
+    def _draw_button(
+        self, 
+        panel: Surface,
+        button_rect: Rect, 
+        text: str, 
+        font: pygame.font.Font, 
+        button_color: Optional[RGB] = DEFAULT_BUTTON_COLOR, 
+        text_color: Optional[RGB] = BUTTON_TEXT_COLOR
+        ) -> None:
+        button = pygame.Surface((button_rect.width, button_rect.height))
+        button.fill(button_color)
+        
+        label = font.render(text, True, text_color)
+        label_rect = label.get_rect(center=(button_rect.width // 2, button_rect.height // 2))
+        button.blit(label, label_rect)
+        panel.blit(button, button_rect.topleft)
+
+    def _draw_left_panel(self, maze: Maze) -> None:
+        panel = pygame.Surface((Panel.width, Panel.height))
+        panel.fill((20, 20, 20))
+        title = TITLE_FONT.render("Maze Solver", True, (255, 255, 255))
+        
+        panel.blit(title, (60, 25))
+        Buttons.rows_input_box.draw(panel, LABEL_FONT)
+        panel.blit(LABEL_FONT.render("Rows:", True, (255, 255, 255)), (110, 68))
+        Buttons.rows_input_box.draw(panel, LABEL_FONT)
+        panel.blit(LABEL_FONT.render("Columns:", True, (255, 255, 255)), (92, 158))
+        Buttons.columns_input_box.draw(panel, LABEL_FONT)
+        panel.blit(LABEL_FONT.render("Simulation Speed:", True, (255, 255, 255)), (30, 248))
+        Buttons.speed_input_box.draw(panel, LABEL_FONT)
+        
+        self._draw_button(panel, Buttons.bfs, 'BFS', BUTTON_FONT, SELECTED_BFS_COLOR if maze.selected_algorithm == 'BFS' else UNSELECTED_BFS_COLOR, BFS_TEXT_COLOR)
+        self._draw_button(panel, Buttons.dfs, 'DFS', BUTTON_FONT, SELECTED_DFS_COLOR if maze.selected_algorithm == 'DFS' else UNSELECTED_DFS_COLOR, DFS_TEXT_COLOR)
+        self._draw_button(panel, Buttons.generate, 'Generate Maze', BUTTON_FONT)
+        self._draw_button(panel, Buttons.solve, 'Solve', BUTTON_FONT)
+        self._draw_button(panel, Buttons.reset, 'Reset', BUTTON_FONT)
+        self._draw_button(panel, Buttons.no_path, 'No Path Test', BUTTON_FONT, text_color=NO_PATH_TEXT_COLOR)
+        
+        algo = maze.selected_algorithm if maze.selected_algorithm else "None"
+        path_len = len(maze.path) if maze.path else 0
+        visited = maze.visited_count if maze.visited_count else 0
+        runtime = maze.runtime if maze.runtime else 0.0
+
+        # Status text
+        if maze.selected_algorithm is None:
+            status = "Idle"
+        elif maze.path:
+            status = "Path Found"
+        else:
+            status = "No Path Found"
+
+        # Status color
+        if status == "Path Found":
+            status_color = (0, 255, 0)
+        elif status == "No Path Found":
+            status_color = (255, 80, 80)
+        else:
+            status_color = (255, 255, 255)
+            
+        panel.blit(STATS_FONT.render(f"Algorithm: {algo}", True, (255, 255, 255)), (25, STATS_START_Y_POS))
+        panel.blit(STATS_FONT.render(f"Path Length: {path_len}", True, (255, 255, 255)), (25, STATS_START_Y_POS + STATS_LABEL_GAP))
+        panel.blit(STATS_FONT.render(f"Visited Nodes: {visited}", True, (255, 255, 255)), (25, STATS_START_Y_POS + STATS_LABEL_GAP * 2))
+        panel.blit(STATS_FONT.render(f"Runtime: {runtime:.6f}s", True, (255, 255, 255)), (25, STATS_START_Y_POS + STATS_LABEL_GAP * 3))
+        panel.blit(STATS_FONT.render(f"Status: {status}", True, status_color), (25, STATS_START_Y_POS + STATS_LABEL_GAP * 4))
+        
+        self.background.blit(panel, (0, 0))
+        self.region_update_queue.append(panel.get_rect())
     
     def _center_maze(self, maze: Maze) -> None:
         screen_width, screen_height = self.screen.get_size()
@@ -62,6 +139,9 @@ class MazeRenderer:
         self.cached_grid: Grid = None
         self.region_update_queue = [self.screen.get_rect()]
         self.trail_index = -1
+    
+    def update_panel(self, maze: Maze) -> None:
+        self._draw_left_panel(maze)
 
     def draw_static_maze(self, maze: Maze) -> None:
         self._center_maze(maze)
@@ -81,6 +161,7 @@ class MazeRenderer:
         self.cached_grid = maze.grid
         
     def render(self, maze: Maze) -> None:
+        self.update_panel(maze)
         if self.trail_index < len(maze.solve_history):
             self._walk_path(maze)
             
