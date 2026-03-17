@@ -6,6 +6,10 @@ from ui.renderer import MazeRenderer
 from config import ScreenSize, MazeSize
 from ui.buttons import Buttons
 
+"""
+Main entry point for the Maze Solver application.
+Initializes the Pygame environment, creates the main window, and sets up the maze, renderer, and event handler.
+"""
 def main():
     pygame.display.init()
     pygame.font.init()

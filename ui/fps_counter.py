@@ -1,7 +1,12 @@
+""" 
+FPS Counter for the Maze Solver application.
+This module defines the FPSCounter class, which is a Pygame sprite that displays the current
+frames per second (FPS) on the screen. The counter updates at a specified interval to provide real-time performance feedback to the user.
+"""
+
 import time as t
 
 from pygame.sprite import Sprite
-from pygame import Surface, font, time
 from pygame.font import Font
 from pygame.time import Clock
 

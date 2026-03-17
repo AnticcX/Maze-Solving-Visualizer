@@ -6,13 +6,23 @@ from typing import Optional
 
 from config import InputBox as IB
 
+""" 
+Input box configuration for the Maze Solver application.
+This module defines the layout and properties of the input boxes used in the application's user interface.
+The InputBox class provides methods for handling user input and rendering the input box on the screen.
+"""
 class InputBox(IB):
     def __init__(self, x: int, y: int, width: int, height: int, text: Optional[str] = None):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.active = False
-
+        
     def handle_event(self, event: Event) -> None:
+        """Handle events for the input box.
+
+        Args:
+            event (Event): The Pygame event to handle.
+        """
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.active = self.rect.collidepoint(event.pos)
 
@@ -26,6 +36,12 @@ class InputBox(IB):
                     self.text += event.unicode
 
     def draw(self, screen: Surface, font: Font) -> None:
+        """Draw the input box on the screen.
+
+        Args:
+            screen (Surface): The Pygame surface to draw on.
+            font (Font): The font to use for rendering text.
+        """
         pygame.draw.rect(
             screen,
             self.active_color if self.active else self.background_color,

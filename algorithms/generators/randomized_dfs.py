@@ -12,6 +12,23 @@ def generate(
     end_pos: Optional[Coordinate] = None, 
     complexity: float = 0.05
     ) -> Grid:
+    """
+    Generates a random maze using a randomized depth-first search algorithm, 
+    with additional paths created based on the specified complexity. 
+    The maze is represented as a grid of characters, where walls are denoted by '#' and 
+    paths are denoted by '.'.
+
+    Args:
+        width (int): The width of the maze to generate.
+        height (int): The height of the maze to generate.
+        start_pos (Coordinate, optional): The starting position for the maze. Defaults to None.
+        end_pos (Coordinate, optional): The ending position for the maze. Defaults to None.
+        complexity (float, optional): A value between 0 and 1 that determines the complexity of the generated maze. Defaults to 0.05.
+
+    Returns:
+        Grid: A 2D list of characters representing the generated maze, where '#' represents walls and '.' represents paths. 
+                The start and end positions are marked with 'S' and 'E' respectively.
+    """
     
     grid = [['#' for _ in range(width)] for _ in range(height)]
     visited = set()
@@ -75,11 +92,29 @@ def generate(
     return grid
 
 def place_start(grid: Grid, pos: Optional[Coordinate] = (1, 1)) -> Grid:
+    """Places the start position on the maze grid at the specified coordinate.
+
+    Args:
+        grid (Grid): The maze grid to place the start position on.
+        pos (Coordinate, optional): The coordinate to place the start position. Defaults to (1, 1).
+
+    Returns:
+        Grid: The maze grid with the start position placed.
+    """
     x, y = pos
     grid[y][x] = Tile.runner.upper()
     return grid
     
 def place_exit(grid: Grid, pos: Coordinate) -> Grid:
+    """Places the exit position on the maze grid at the specified coordinate.
+
+    Args:
+        grid (Grid): The maze grid to place the exit position on.
+        pos (Coordinate): The coordinate to place the exit position.
+
+    Returns:
+        Grid: The maze grid with the exit position placed.
+    """
     x, y = pos
     grid[y][x] = Tile.exit.upper()
     return grid

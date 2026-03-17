@@ -3,6 +3,11 @@ from core.maze import Maze
 from ui.renderer import MazeRenderer
 from config import MazeSize, Speed
 
+""" 
+Event handling for the Maze Solver application.
+This module defines the EventHandler class, which is responsible for processing user input events such as button clicks and keyboard input.
+The EventHandler interacts with the Maze and MazeRenderer classes to update the maze state and visual representation based on user actions.
+"""
 class EventHandler:
     def __init__(self, maze: Maze, renderer: MazeRenderer):
         self.maze: Maze = maze
@@ -10,6 +15,16 @@ class EventHandler:
     
     @staticmethod
     def _parse_positive_int(text: str, min: int, max: int) -> int:
+        """Parse a string input as a positive integer within a specified range, returning a default value if parsing fails.
+
+        Args:
+            text (str): The input string to parse as an integer.
+            min (int): The minimum allowed value for the integer.
+            max (int): The maximum allowed value for the integer.
+
+        Returns:
+            int: The parsed integer value if valid, or a default value if parsing fails or the value is out of range.
+        """
         try:
             value = int(text)
             if value < min:
@@ -21,6 +36,11 @@ class EventHandler:
             return MazeSize.min_size
 
     def handle_button_click(self, pos: tuple[int, int]) -> None:
+        """Handle button click events by checking if the click position collides with any defined buttons and performing the corresponding actions.
+
+        Args:
+            pos (tuple[int, int]): The position of the mouse click.
+        """
         Speed.current = self._parse_positive_int(Buttons.speed_input_box.text, Speed.min_speed, Speed.max_speed)
         Buttons.speed_input_box.text = str(Speed.current)
         if Buttons.bfs.collidepoint(pos):

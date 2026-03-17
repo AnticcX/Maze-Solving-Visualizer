@@ -4,7 +4,6 @@ from typing import Optional, Union
 
 from components import Wall, Exit, Runner, Path, GhostPath
 from ui.fps_counter import FPSCounter
-from ui.input_box import InputBox
 from algorithms import Grid
 from core.maze import Maze
 from core.Types import RGB
@@ -17,7 +16,11 @@ from config import (
     DisplayOffset, Panel, Tile, Speed
 )
 
-
+""" 
+Maze Renderer for the Maze Solver application.
+This module defines the MazeRenderer class, which is responsible for rendering the maze and its components on the screen.
+The MazeRenderer class handles drawing the maze, updating the left panel with algorithm information, and animating the pathfinding process.
+"""
 class MazeRenderer:
     def __init__(self, screen: Surface, clock: pygame.time.Clock):
         self.screen = screen
@@ -35,7 +38,7 @@ class MazeRenderer:
         self.historical_trail_index = -1
         self.trail_index = -1
         self.simulation_running = False
-        
+    
     def _draw_button(
         self, 
         panel: Surface,
@@ -45,6 +48,16 @@ class MazeRenderer:
         button_color: Optional[RGB] = DEFAULT_BUTTON_COLOR, 
         text_color: Optional[RGB] = BUTTON_TEXT_COLOR
         ) -> None:
+        """Draw a button on the given panel with specified properties.
+
+        Args: 
+            panel (Surface): The Pygame surface to draw the button on.
+            button_rect (Rect): The rectangle defining the button's position and size.
+            text (str): The text to display on the button.
+            font (pygame.font.Font): The font to use for rendering the button text.
+            button_color (Optional[RGB], optional): The background color of the button. Defaults to DEFAULT_BUTTON_COLOR.
+            text_color (Optional[RGB], optional): The color of the button text. Defaults to BUTTON_TEXT_COLOR.
+        """
         button = pygame.Surface((button_rect.width, button_rect.height))
         button.fill(button_color)
         
@@ -54,6 +67,11 @@ class MazeRenderer:
         panel.blit(button, button_rect.topleft)
 
     def _draw_left_panel(self, maze: Maze) -> None:
+        """Draw the left panel with algorithm information and buttons.
+
+        Args:
+            maze (Maze): The Maze object containing the current state of the maze and algorithm information.
+        """
         panel = pygame.Surface((Panel.width, Panel.height))
         panel.fill((20, 20, 20))
         title = TITLE_FONT.render("Maze Solver", True, (255, 255, 255))
@@ -105,6 +123,11 @@ class MazeRenderer:
         self.region_update_queue.append(panel.get_rect())
     
     def _center_maze(self, maze: Maze) -> None:
+        """Calculate the display offset to center the maze on the screen.
+
+        Args:
+            maze (Maze): The Maze object to center.
+        """
         screen_width, screen_height = self.screen.get_size()
         
         maze_pixel_width = len(maze.grid[0]) * Tile.size
@@ -117,6 +140,13 @@ class MazeRenderer:
         DisplayOffset.y = Panel.top_margin + max((available_height - maze_pixel_height) // 2, 0)
 
     def _add_tile(self, x_grid: int, y_grid: int, tile: Union[Path, GhostPath]) -> None:
+        """Add a tile (path or ghost path) to the maze display at the specified grid coordinates.
+
+        Args: 
+            x_grid (int): The x-coordinate in the maze grid.
+            y_grid (int): The y-coordinate in the maze grid.
+            tile (Union[Path, GhostPath]): The type of tile to add (either a Path or GhostPath).
+        """
         x = x_grid * Tile.size + DisplayOffset.x
         y = y_grid * Tile.size + DisplayOffset.y
         path: Union[Path, GhostPath] = tile(x, y)
@@ -124,6 +154,12 @@ class MazeRenderer:
         self.region_update_queue.append(path.rect)
             
     def _walk_path(self, maze: Maze, historical: bool = True) -> None:
+        """Animate the pathfinding process by walking through the path or historical trail of the maze.
+
+        Args:
+            maze (Maze): The Maze object containing the current state of the maze and algorithm information.
+            historical (bool, optional): Whether to walk through the historical trail or the final path. Defaults to True.
+        """
         for _ in range(Speed.current):
             y, x = maze.solve_history[self.historical_trail_index] if historical else maze.path[self.trail_index]
             if maze.grid[y][x].lower() != Tile.runner and maze.grid[y][x].lower() != Tile.exit:
@@ -137,6 +173,8 @@ class MazeRenderer:
             elif not historical and self.trail_index >= len(maze.path): break
 
     def reset_screen(self) -> None:
+        """Reset the maze display to its initial state, clearing all paths and sprites while keeping the maze structure intact.
+        """
         Tile.update_size()
         self.all_sprites.clear(self.screen, self.background)
         self.all_sprites.empty()
@@ -147,11 +185,13 @@ class MazeRenderer:
         self.trail_index = -1
         self.historical_trail_index = -1
         self.simulation_running = False
-        
-    def update_panel(self, maze: Maze) -> None:
-        self._draw_left_panel(maze)
 
     def draw_static_maze(self, maze: Maze) -> None:
+        """Draw the static maze structure on the screen without any pathfinding animation.
+
+        Args:
+            maze (Maze): The Maze object containing the static maze structure.
+        """
         self._center_maze(maze)
         for row_i, row in enumerate(maze.grid):
             for col_i, char in enumerate(row):
@@ -169,7 +209,12 @@ class MazeRenderer:
         self.cached_grid = maze.grid
         
     def render(self, maze: Maze) -> None:
-        self.update_panel(maze)
+        """Render the maze and its components on the screen, including the left panel, static maze structure, and pathfinding animation.
+
+        Args:
+            maze (Maze): The Maze object containing the current state of the maze and algorithm information.
+        """
+        self._draw_left_panel(maze)
         if self.simulation_running and self.historical_trail_index < len(maze.solve_history):
             self._walk_path(maze)
         elif self.simulation_running and len(maze.path) > 0 and self.trail_index < len(maze.path):
