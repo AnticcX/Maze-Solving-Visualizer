@@ -10,11 +10,11 @@ from core.maze import Maze
 from core.Types import RGB
 from ui.buttons import Buttons
 from config import (
-    TILE_SIZE, MAZE_BACKGROUND_COLOR, SIMULATION_SPEED, TITLE_FONT, BUTTON_FONT, LABEL_FONT, STATS_FONT,
+    MAZE_BACKGROUND_COLOR, TITLE_FONT, BUTTON_FONT, LABEL_FONT, STATS_FONT,
     BUTTON_TEXT_COLOR, DEFAULT_BUTTON_COLOR, NO_PATH_TEXT_COLOR, DFS_TEXT_COLOR, BFS_TEXT_COLOR,
     SELECTED_BFS_COLOR, SELECTED_DFS_COLOR, UNSELECTED_BFS_COLOR, UNSELECTED_DFS_COLOR,
     STATS_START_Y_POS, STATS_LABEL_GAP,
-    DisplayOffset, Panel
+    DisplayOffset, Panel, Tile, Speed
 )
 
 
@@ -32,7 +32,9 @@ class MazeRenderer:
         self.cached_grid: Grid = None
         self.region_update_queue = []
         
+        self.historical_trail_index = -1
         self.trail_index = -1
+        self.simulation_running = False
         
     def _draw_button(
         self, 
@@ -65,8 +67,8 @@ class MazeRenderer:
         panel.blit(LABEL_FONT.render("Simulation Speed:", True, (255, 255, 255)), (30, 248))
         Buttons.speed_input_box.draw(panel, LABEL_FONT)
         
-        self._draw_button(panel, Buttons.bfs, 'BFS', BUTTON_FONT, SELECTED_BFS_COLOR if maze.selected_algorithm == 'BFS' else UNSELECTED_BFS_COLOR, BFS_TEXT_COLOR)
-        self._draw_button(panel, Buttons.dfs, 'DFS', BUTTON_FONT, SELECTED_DFS_COLOR if maze.selected_algorithm == 'DFS' else UNSELECTED_DFS_COLOR, DFS_TEXT_COLOR)
+        self._draw_button(panel, Buttons.bfs, 'BFS', BUTTON_FONT, SELECTED_BFS_COLOR if maze.selected_algorithm.lower() == 'bfs' else UNSELECTED_BFS_COLOR, BFS_TEXT_COLOR)
+        self._draw_button(panel, Buttons.dfs, 'DFS', BUTTON_FONT, SELECTED_DFS_COLOR if maze.selected_algorithm.lower() == 'dfs' else UNSELECTED_DFS_COLOR, DFS_TEXT_COLOR)
         self._draw_button(panel, Buttons.generate, 'Generate Maze', BUTTON_FONT)
         self._draw_button(panel, Buttons.solve, 'Solve', BUTTON_FONT)
         self._draw_button(panel, Buttons.reset, 'Reset', BUTTON_FONT)
@@ -105,8 +107,8 @@ class MazeRenderer:
     def _center_maze(self, maze: Maze) -> None:
         screen_width, screen_height = self.screen.get_size()
         
-        maze_pixel_width = len(maze.grid[0]) * TILE_SIZE
-        maze_pixel_height = len(maze.grid) * TILE_SIZE
+        maze_pixel_width = len(maze.grid[0]) * Tile.size
+        maze_pixel_height = len(maze.grid) * Tile.size
         
         available_width = screen_width - Panel.width
         available_height = screen_height - Panel.top_margin - Panel.bottom_margin
@@ -115,23 +117,27 @@ class MazeRenderer:
         DisplayOffset.y = Panel.top_margin + max((available_height - maze_pixel_height) // 2, 0)
 
     def _add_tile(self, x_grid: int, y_grid: int, tile: Union[Path, GhostPath]) -> None:
-        x = x_grid * TILE_SIZE + DisplayOffset.x
-        y = y_grid * TILE_SIZE + DisplayOffset.y
+        x = x_grid * Tile.size + DisplayOffset.x
+        y = y_grid * Tile.size + DisplayOffset.y
         path: Union[Path, GhostPath] = tile(x, y)
         self.background.blit(path.image, path.rect)
         self.region_update_queue.append(path.rect)
             
-    def _walk_path(self, maze: Maze) -> None:
-        for _ in range(SIMULATION_SPEED):
-            y, x = maze.solve_history[self.trail_index]
-            if maze.grid[y][x] != 'S' and maze.grid[y][x] != 'E':
-                if (y, x) in maze.path: self._add_tile(x, y, Path)
-                else:                   self._add_tile(x, y, GhostPath)
-                    
-            self.trail_index += 1
-            if self.trail_index >= len(maze.solve_history): break
-        
+    def _walk_path(self, maze: Maze, historical: bool = True) -> None:
+        for _ in range(Speed.current):
+            y, x = maze.solve_history[self.historical_trail_index] if historical else maze.path[self.trail_index]
+            if maze.grid[y][x].lower() != Tile.runner and maze.grid[y][x].lower() != Tile.exit:
+                if historical:
+                    self._add_tile(x, y, GhostPath)
+                else:                   
+                    self._add_tile(x, y, Path)
+            if historical: self.historical_trail_index += 1
+            else: self.trail_index += 1
+            if historical and self.historical_trail_index >= len(maze.solve_history): break
+            elif not historical and self.trail_index >= len(maze.path): break
+
     def reset_screen(self) -> None:
+        Tile.update_size()
         self.all_sprites.clear(self.screen, self.background)
         self.all_sprites.empty()
         self.all_sprites.add(FPSCounter(0, 0, self.clock))
@@ -139,7 +145,9 @@ class MazeRenderer:
         self.cached_grid: Grid = None
         self.region_update_queue = [self.screen.get_rect()]
         self.trail_index = -1
-    
+        self.historical_trail_index = -1
+        self.simulation_running = False
+        
     def update_panel(self, maze: Maze) -> None:
         self._draw_left_panel(maze)
 
@@ -147,24 +155,26 @@ class MazeRenderer:
         self._center_maze(maze)
         for row_i, row in enumerate(maze.grid):
             for col_i, char in enumerate(row):
-                x = col_i * TILE_SIZE + DisplayOffset.x
-                y = row_i * TILE_SIZE + DisplayOffset.y
+                x = col_i * Tile.size + DisplayOffset.x
+                y = row_i * Tile.size + DisplayOffset.y
                 
-                if char == '#':
+                if char == Tile.wall:
                     wall = Wall(x, y)
                     self.background.blit(wall.image, wall.rect)
                     self.region_update_queue.append(wall.rect)
-                elif char.lower() == 'e': 
+                elif char.lower() == Tile.exit: 
                     self.all_sprites.add(Exit(x, y))
-                elif char.lower() == 's':
+                elif char.lower() == Tile.runner:
                     self.all_sprites.add(Runner(x, y))
         self.cached_grid = maze.grid
         
     def render(self, maze: Maze) -> None:
         self.update_panel(maze)
-        if self.trail_index < len(maze.solve_history):
+        if self.simulation_running and self.historical_trail_index < len(maze.solve_history):
             self._walk_path(maze)
-            
+        elif self.simulation_running and self.trail_index < len(maze.path):
+            self._walk_path(maze, historical=False)
+
         self.all_sprites.update()
         self.screen.blit(self.background, (0, 0))
         self.region_update_queue.extend(self.all_sprites.draw(self.screen))
