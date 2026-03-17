@@ -1,8 +1,10 @@
 import pygame, sys
 
 from core.maze import Maze
+from core.event_handler import EventHandler
 from ui.renderer import MazeRenderer
 from config import ScreenSize, MazeSize
+from ui.buttons import Buttons
 
 def main():
     pygame.display.init()
@@ -20,6 +22,8 @@ def main():
     renderer = MazeRenderer(screen, clock)
     renderer.reset_screen()
     
+    event_handler = EventHandler(maze, renderer)
+    
     running = True
     while running:
         for event in pygame.event.get():
@@ -28,16 +32,13 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-                if event.key == pygame.K_0:
-                    renderer.reset_screen()
-                    if maze.selected_algorithm == 'bfs':    maze.solve('dfs')
-                    else:                                   maze.solve('bfs')
-                    
-                if event.key == pygame.K_1:
-                    renderer.reset_screen()
-                    maze = Maze(screen, clock)
-                    maze.generate_random(MazeSize.width, MazeSize.height, (1, 1), (MazeSize.width-3, MazeSize.height-3), 0.025)
-                    maze.solve()
+            
+            Buttons.rows_input_box.handle_event(event)
+            Buttons.columns_input_box.handle_event(event)
+            Buttons.speed_input_box.handle_event(event)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                event_handler.handle_button_click(event.pos)
+            
         
         if maze.grid != renderer.cached_grid:
             renderer.draw_static_maze(maze)

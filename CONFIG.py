@@ -55,21 +55,35 @@ class DisplayOffset:
     
 @dataclass
 class MazeSize:
-    width               : int = 500
-    height              : int = 500
-    max_width           : int = 1000
-    max_height          : int = 1000
+    width               : int = 250
+    height              : int = 250
+    min_size            : int = 5
+    max_size            : int = 250
+    
+# How many tile paths are being drawn per each tick
+@dataclass
+class Speed:
+    min_speed           : int = 1
+    max_speed           : int = 150
+    current             : int = 1
+    
+@dataclass
+class Tile:
+    wall                : str = '#'
+    air                 : str = '.'
+    runner              : str = 's'
+    exit                : str = 'e'
+    size                : int = 1000 / ((MazeSize.width + MazeSize.height) / 2) # Pixel size of each grid square
+    
+    @staticmethod
+    def update_size():
+        Tile.size = 1000 / ((MazeSize.width + MazeSize.height) / 2)
 
 MAZE_BACKGROUND_COLOR   : tuple = (100, 105, 100) # rgb value
 
 # Sprite config
-TILE_SIZE               : float = 1000 / ((MazeSize.width + MazeSize.height) / 2) # Pixel size of each grid square
 GHOST_PATH_COLOR        : RGB = (40, 40, 55)
 PATH_COLOR              : RGB = (255, 255, 0)
 RUNNER_COLOR            : RGB = (255, 100, 255)
 WALL_COLOR              : RGB = (20, 20, 20)
 EXIT_COLOR              : RGB = (0, 255, 0)
-
-
-# Simulation config
-SIMULATION_SPEED        : int = 1 # How many tile paths are being drawn per each game tick

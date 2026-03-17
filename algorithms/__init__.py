@@ -10,7 +10,7 @@ def solve_dfs(maze: Grid) -> tuple[Path, int, float, Path]:
     solved_data = internal_dfs_solve(maze)
     return solved_data['path'], solved_data['visited_count'], solved_data['runtime'], solved_data['path_history']  # add solve(path) history to dfs
 
-def solve_bfs(maze: Grid) -> tuple[Path, int, float]:
+def solve_bfs(maze: Grid) -> tuple[Path, int, float, Path]:
     return internal_bfs_solve(maze)
 
 __all__ = ['solve_dfs', 'solve_bfs', 'randomized_dfs']
