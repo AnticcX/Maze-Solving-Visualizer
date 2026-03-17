@@ -58,7 +58,7 @@ class MazeSize:
     width               : int = 250
     height              : int = 250
     min_size            : int = 5
-    max_size            : int = 250
+    max_size            : int = 1000
     
 # How many tile paths are being drawn per each tick
 @dataclass
@@ -77,7 +77,9 @@ class Tile:
     
     @staticmethod
     def update_size():
-        Tile.size = 1000 / ((MazeSize.width + MazeSize.height) / 2)
+        width_scale = 1000 / MazeSize.width
+        height_scale = 1000 / MazeSize.height
+        Tile.size = min(width_scale, height_scale)
 
 MAZE_BACKGROUND_COLOR   : tuple = (100, 105, 100) # rgb value
 
