@@ -43,4 +43,7 @@ class EventHandler:
             self.maze.solve(self.maze.selected_algorithm)
         elif Buttons.reset.collidepoint(pos):
             self.renderer.reset_screen()
-    
+        elif Buttons.no_path.collidepoint(pos):
+            self.maze.block_exit()
+            self.renderer.reset_screen()
+            self.renderer.draw_static_maze(self.maze)

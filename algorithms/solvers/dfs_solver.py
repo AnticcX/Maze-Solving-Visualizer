@@ -130,7 +130,7 @@ def solve_dfs(maze: MazeGrid) -> Dict[str, object]:
         "visited_count": visited_count,
         "runtime": runtime,
         "message": "No Path Found",
-        "path_history": []
+        "path_history": path_history
     }
 
 

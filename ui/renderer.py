@@ -172,7 +172,7 @@ class MazeRenderer:
         self.update_panel(maze)
         if self.simulation_running and self.historical_trail_index < len(maze.solve_history):
             self._walk_path(maze)
-        elif self.simulation_running and self.trail_index < len(maze.path):
+        elif self.simulation_running and len(maze.path) > 0 and self.trail_index < len(maze.path):
             self._walk_path(maze, historical=False)
 
         self.all_sprites.update()

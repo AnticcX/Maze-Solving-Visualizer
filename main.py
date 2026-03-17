@@ -15,9 +15,9 @@ def main():
     pygame.display.flip()
     clock = pygame.time.Clock()
     
-    maze = Maze(screen, clock)
+    maze = Maze()
     maze.generate_random(MazeSize.width, MazeSize.height, (1, 1), (MazeSize.width-3, MazeSize.height-3), 0.025)
-    maze.solve('bfs')
+    maze.solve()
     
     renderer = MazeRenderer(screen, clock)
     renderer.reset_screen()

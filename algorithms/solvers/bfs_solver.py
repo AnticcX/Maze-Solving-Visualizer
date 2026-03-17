@@ -46,7 +46,7 @@ def bfs(maze):
     runtime = time.time() - start_time
 
     if end not in parent and end != start:
-        return None, len(visited), runtime
+        return [], len(visited), runtime, path_history
 
     path = []
     node = end
