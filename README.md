@@ -25,3 +25,9 @@ Use the buttons to swap between DFS and BFS, generate new randomized mazes, bloc
 - Adjustable simulation speed
 - No path test case
 - Randomized maze generated with randomized DFS (recursive backtracing)
+
+
+
+![Image of application home screen](images/example_1.png)
+![Image of application running simulation](images/example_2.png)
+![Gif of simulation running](images/example.gif)
